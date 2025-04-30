@@ -183,10 +183,10 @@
   <div class="hero-body">
     <div style="text-align: center;" >
       <p style="font-size: 28px;">
-          Tracking Results of <b>MonoNPHM</b>.
+          Tracking Results of <b>Pixel3DMM</b>.
       </p>
       <p>
-          From left to right: input, overlay, reconstrcutions.
+          From left to right: input, predicted normals, predicted 2d vertices, tracking overlay, FLAME tracking.
       </p>
 
   </div>
@@ -194,31 +194,31 @@
       <div id="results-carousel" class="carousel results-carousel">
         <div class="item item-shiba">
           <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_simon_510_s4.mp4"
+            <source src="./static/videos/website_trakcing_mrm31EMpIi8_12_crf30.mp4"
                     type="video/mp4">
           </video>
         </div>
         <div class="item item-fullbody">
           <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_simon_508_s5.mp4"
+            <source src="./static/videos/website_trakcing_head_rot_expr2_crf30.mp4"
                     type="video/mp4">
           </video>
         </div>
         <div class="item item-blueshirt">
           <video poster="" id="blueshirt" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_simon_510_s3.mp4"
+            <source src="./static/videos/website_trakcing_jA-BCSOaa4Q_0_crf30.mp4"
                     type="video/mp4">
           </video>
         </div>
           <div class="item item-mask">
           <video poster="" id="mask" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_simon_509_s4.mp4"
+            <source src="./static/videos/website_trakcing_o9DsswQ0FhY_7_crf30.mp4"
                     type="video/mp4">
           </video>
         </div>
         <div class="item item-mask">
           <video poster="" id="mask" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_simon_511_s5.mp4"
+            <source src="./static/videos/website_trakcing_U45CzgrLE9s_5_crf30.mp4"
                     type="video/mp4">
           </video>
         </div>
@@ -266,6 +266,7 @@
         </div>
     </section>
 
+    <!--
     <div style="text-align: center;" >
           <p style="font-size: 28px;">
               Reconstructed Geometry.
@@ -291,19 +292,20 @@
         </div>
         <div style="text-align: center;">Press <b>R</b> to reset views. </div>
     </div>
-
+-->
 
 
 
     <section class="hero is-light is-small">
+        <div class="columns is-centered" style="margin-top: 15px">
+        <h2 class="title is-3">Single Image Reconstructions</h2>
+        </div>
 
     <div class="hero-body">
         <div style="text-align: center;" >
-              <p style="font-size: 28px;">
-                  Expression Transfers.
-              </p>
+
               <p>
-                  Tracked expression codes from the input video (left) are transferred to other identites in the right.
+                  Given an input image (top right) we show posed geometry reconstructions of DECA, FlowFace and Ours against the ground truth COLMAP point cloud.
               </p>
 
           </div>
@@ -311,20 +313,43 @@
       <div id="results-carousel" class="carousel results-carousel">
         <div class="item item-chair-tp">
           <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_expression_transfer_1.mp4"
-                    type="video/mp4">
+            <source src="./static/videos/posed1_comp.mp4" type="video/mp4">
           </video>
         </div>
         <div class="item item-shiba">
           <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_expression_transfer_2.mp4"
-                    type="video/mp4">
+        <source src="./static/videos/posed2_comp.mp4" type="video/mp4">
           </video>
         </div>
         <div class="item item-fullbody">
           <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_expression_transfer_3.mp4"
-                    type="video/mp4">
+        <source src="./static/videos/posed3_comp.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+    </div>
+</section>
+    <section class="hero is-light is-small">
+
+    <div class="hero-body">
+        <div style="text-align: center;" >
+
+              <p>
+                  Given an input image (top right) we show neutral geometry reconstructions of DECA, FlowFace and Ours against the ground truth COLMAP point cloud.
+              </p>
+
+          </div>
+    <div id="results-container" class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-chair-tp">
+          <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/neutral1_comp.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-shiba">
+          <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
+        <source src="./static/videos/neutral2_comp.mp4" type="video/mp4">
           </video>
         </div>
       </div>
@@ -338,7 +363,9 @@
     <!-- Overview. -->
     <div class="columns is-centered" style="margin-top: 15px">
         <div class="column is-full-width">
+            <div class="columns is-centered">
             <h2 class="title is-3">Method Overview</h2>
+            </div>
             <img src="./static/teaser/overview.jpg"/>
             <div class="content has-text-justified" style="padding-top: 15px">
                 <p><b>Left:</b> Our network consists of a DINO backbone and a light-weight prediction head. We train our models on the NPHM, FaceScape and Ava256 datasets, which we bring into a uniform format using FLAME and non-rigid registration.</p>
@@ -348,29 +375,50 @@
 
         </div>
     </div>
+    </section>
 
-<h2 class="title is-3">Deformation Consistency</h2>
-            We visualize the tracked geometry (left), xy-canonical coordinates (middle), and the predicted hyper dimensions mapped to the red and green channel (right).
-<div class="hero-body">
-    <div class="container">
-          <video poster="" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/compressed_canonical_coordinates.mp4"
-                    type="video/mp4">
-          </video>
 
+    <section class="hero is-light is-small">
+
+    <div class="hero-body">
+        <div style="text-align: center;" >
+              <p style="font-size: 28px;">
+                  Surface Normal Estimation.
+              </p>
+              <p>
+                  Given an input image (left) we show predictions from several surface normal estimators (right top) and
+                  error maps (right bottom).
+              </p>
+
+          </div>
+    <div id="results-container" class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-chair-tp">
+            <img src="./static/figures/normals1.png">
+        </div>
+        <div class="item item-shiba">
+            <img src="./static/figures/normals2.png">
+        </div>
+        <div class="item item-fullbody">
+            <img src="./static/figures/normals3.png">
+        </div>
+        <div class="item item-fullbody">
+            <img src="./static/figures/normals4.png">
+        </div>
+      </div>
     </div>
-</div>
+    </div>
+</section>
 
+    <section class="section">
+        <div class="container is-max-desktop">
 
     <div class="columns is-centered">
         <div class="column is-full-width">
             <h2 class="title is-3">Related Links</h2>
-            - FlowFace, VHAP, Metrical Tracker
-            - MICA, DECA, EMOCA, TokenFace ...
-            - normal predictors
 
-            Figures:
-            - normals, neutral, posed
+            <!--Figures:
+            - normals comparisons, neutral >> video, posed >> video -->
 
             <div class="content has-text-justified">
                 <p>
@@ -379,37 +427,19 @@
                     </b>
                 </p>
                 <p>
-                    <a href="https://simongiebenhain.github.io/NPHM/">NPHM</a> and <a href="https://github.com/MingwuZheng/ImFace">IMface</a> learn neural parametric model for facial geometry.
+                    <b>FLAME Tracking: </b><a href="https://github.com/ShenhanQian/VHAP">VHAP (also support multi-view tracking)</a>,
+                    <a href="https://felixtaubner.github.io/flowface/">FlowFace (no Code release yet, but promised)</a> and
+                    <a href="https://github.com/Zielon/metrical-tracker">MetricalTracker</a>.
                 </p>
                 <p>
-                    Neural parametric models including color were proposed in <a href="https://arxiv.org/abs/2212.07275">PhMoH</a> and
-                    <a href="https://research.nvidia.com/labs/toronto-ai/ssif/">SSIF</a>.
+                    <b>FLAME Feed-Forward Regressors: </b><a href="https://github.com/Zielon/MICA">MICA (best Identity predictions)</a>,
+                    <a href="https://github.com/radekd91/emoca">EMOCA</a>
                 </p>
 
-
-
                 <p>
-                    <b>
-                        For more work utilizing NPHMs see:
-                    </b>
+                    <b>Surface Normal Estimation: </b><a href="https://rawalkhirodkar.github.io/sapiens/">Sapiens</a>,
+                    <a href="https://github.com/VisualComputingInstitute/diffusion-e2e-ft">Diff-E2E</a>
                 </p>
-                <p>
-                    <a href="https://tobias-kirschstein.github.io/diffusion-avatars/">DiffusionAvatar</a> utilizes NPHM as a proxy geometry to add fine-grained control to powerful diffusion-based neural renderer.
-                </p>
-                <p>
-                    <a href="https://shivangi-aneja.github.io/projects/facetalk/">FaceTalk</a> generates a consistent expression sequence given an audio sequence using a diffusion model.
-                </p>
-		<p>
-                    <a href="https://tangjiapeng.github.io/projects/DPHMs/">DPHM</a> builds a diffusion prior for robust NPHM tracking using a depth sensor.
-                </p>
-		<p>
-                    <a href="https://raipranav384.github.io/clip_head">ClipHead</a> uses a large vision-language-model to add text control to NPHM.
-                </p>
-                <!--
-                <p>
-                     To be continued.
-                </p>
-                -->
             </div>
         </div>
     </div>
@@ -419,17 +449,17 @@
 
 
 
-
-
     <section class="section" id="BibTeX">
         <div class="container is-max-desktop content">
             <h2 class="title">BibTeX</h2>
             <pre>
-<code>@inproceedings{giebenhain2024mononphm,
- author={Simon Giebenhain and Tobias Kirschstein and Markos Georgopoulos and  Martin R{\"{u}}nz and Lourdes Agapito and Matthias Nie{\ss}ner},
- title={MonoNPHM: Dynamic Head Reconstruction from Monocular Videos},
- booktitle = {Proc. IEEE Conf. on Computer Vision and Pattern Recognition (CVPR)},
- year = {2024}}
+<code>@misc{giebenhain2025pixel3dmm,
+title={Pixel3DMM: Versatile Screen-Space Priors for Single-Image 3D Face Reconstruction},
+author={Simon Giebenhain and Tobias Kirschstein and  Martin R{\"{u}}nz and Lourdes Agapito and Matthias Nie{\ss}ner},
+year={2025},
+eprint={TODO},
+url={https://arxiv.org/abs/TODO},
+}
 
 </code></pre>
         </div>
@@ -451,9 +481,7 @@
                     <div class="content">
                         <p style="text-align:center">
                             Source code borrowed from <a href="https://keunhong.com/">Keunhong Park</a>'s
-                            <a href="https://nerfies.github.io/">Nerfies website</a> and especially
-                            <a href="https://niessnerlab.org/members/yawar_siddiqui/profile.html">Yawar Siddiqui's</a> adoption for
-                            <a href="https://nihalsid.github.io/texturify//">Texturify</a>.
+                            <a href="https://nerfies.github.io/">Nerfies website</a>.
                         </p>
                         <p style="text-align:center">
                             Please contact <a href="https://niessnerlab.org/members/simon_giebenhain/profile.html">Simon Giebenhain</a> for feedback and questions.
