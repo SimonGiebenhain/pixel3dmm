@@ -18,7 +18,7 @@ This repository contains the official implementation of the paper:
 
 ## 1. Installation 
 
-First we need to set up a conda enviroment. Below, there are two installation options presented:
+First we need to set up a conda environment. Below, there are two installation options presented:
 
 ### Option A: Using `environment.yml`
 > Note that this can take quite a while.
@@ -92,7 +92,7 @@ VID_NAME="${base_name%%.*}"
 
 python scripts/run_preprocessing.py --video_or_images_path $PATH_TO_VIDEO
 ````
-which will perform cropping, facial landmark detection and segmentation and exectute MICA.
+which will perform cropping, facial landmark detection and segmentation and execute MICA.
 Here, `PATH_TO_VIDEO` can either point to an `.mp4` file, or to a folder with images.
 
 > *Note*: You can also run single-image FLAME fitting when providing `.jpg` or `.png` files instead of `.mp4`
@@ -125,7 +125,7 @@ python scripts/track.py video_name=$VID_NAME
 > - `global_iters` controls the number of iteration of the global optimization stage.
 ### 2.4 Visualizations
 
-For convenience we provide a script that shows how to correctly interpret the estimated camera paramteres in relation to the FLAME mesh.
+For convenience we provide a script that shows how to correctly interpret the estimated camera parameters in relation to the FLAME mesh.
 Running
 ````
 python scripts/viz_head_centric_cameras.py 
