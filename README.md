@@ -65,6 +65,13 @@ Next, you can install all necessary preprocessing repositories and download netw
 ```
 ./install_preprocessing_pipeline.sh
 ```
+#### Downloading FLAME
+We added support for `FLAME2023_no_jaw`. It will now be downloaded by default in the previous step. If you have previsouly installed pixel3dmm, you can download FLAME2023 by running
+```
+./download_flame2023.sh
+```
+Alternatively, you can manually download both FLAME2020 and FLAME2023 from the [FLAME website](https://flame.is.tue.mpg.de/), unzip, and place the folders `FLAME2020` and `FLAME2023` into `src/pixel3dmm/preprocessing/MICA/data/`
+
 
 ### 1.2 Environment Paths
 
@@ -105,8 +112,8 @@ python scripts/network_inference.py model.prediction_type=uv_map video_name=$VID
 
 > *Note*: You can have a look at the preprocessed result and pixel3dmm predictions in `PIXEL3DMM_PREPROCESSED_DATA/{VID_NAME}`. 
 
-
 > *Note*: This script assumes square images and resizes to 512x512 before the network inference.
+> *Important Note*: Normal predictions are made in the FLAME coordinate system, not in camera space.
 
 ### 2.3 Tracking
 Finally, run the tracking as such
@@ -123,8 +130,18 @@ python scripts/track.py video_name=$VID_NAME
 > - increasing `early_stopping_delta` will speed up the online tracking phase, as it controls at what rate of loss-change to skip to the next frame.
 > - `global_iters` controls the number of iteration of the global optimization stage.
 
+#### Description of notable hyper-parameters
+The following will give a brief overview of important hyper-parameters which might be helpful to tune Pixel3dmm to your specific use-case. Defaults are specified in `configs/tracking.yaml` and can e.g. be overwritten as command line arguments
 
-### 2.4 Single-Image Inference
+> - `iters` and `global_iters` specify the number of optimization steps per-frame in stage1, and globally in stage2, repsectively.
+> - `ùse_flame2023` will use the FLAME2023_no_jaw version, should be used in conjunction with `ignore_mica=True`, since MICA is trained with FLAME2020_generic
+> - weights of different losses: `uv_map_super`, `normal_super` and `sil_super` specifiy the weights for the uv, normal and silhouette losses, respectively. There are also weights for regular facial landmark losses, which are usually not as reliable/accurate, but might perform better on videos with poor visual quality or strong video compression artifacts. Especially, landmark losses in the eye region are important, since the uv_map predictor performs poorly in that region, due to bad training data quality. If youre image/videos are of high quality, you might acheive better results with `use_mouth_lmk=False`.
+> - weights of regularizers: `w_exp`, `w_shape`, `w_general`, specify the weight for regualarizers on expression code, shape code w.r.t to MICA (or zero if `ignore_mica=True`), and shape code w.r.t. zero
+> - `ìs_discontinuous` can be specified for multi-image tracking, see below.
+> - Often the neck is underconstraint, it can be excluded by setting `include_neck=False`
+
+
+### 2.4.1 Single-Image Inference
 
 You can also run single-image FLAME fitting when providing `.jpg` or `.png` files instead of `.mp4`. 
 It is suggested to use a higher value for `iters`, e.g. by calling
@@ -133,14 +150,29 @@ python scripts/track.py video_name=$VID_NAME iters=800
 ```
 This is necessary since video tracking consists of two stages, the *online* and *joint* tracking stages. For single image fitting the *joint* stage is skipped.
 
+### 2.4.2 Multi-Image Inference
+
+You can also run multi-image FLAME fitting, i.e. images which are taken separately, without temporal continuity as in a video.
+
+```
+python scripts/track.py video_name=$VID_NAME iters=100 iters=1500 include_neck=False w_exp=0.1 use_mouth_lmk=False w_shape=0.01 w_shape_general=0.001 normal_super=2000.0 sil_super=1000.0 use_flame2023=True ignore_mica=True is_discontinuous=True
+```
+
+For example you can use example images located in `media/example_multi_images` to obtain the following result:
+
+<div style="text-align: center">
+<img src="media/multi_image_result.jpg" />
+</div>
+
 
 ### 2.5 Visualizations
 
 For convenience we provide a script that shows how to correctly interpret the estimated camera paramteres in relation to the FLAME mesh.
 Running
 ````
-python scripts/viz_head_centric_cameras.py 
+python scripts/viz_head_centric_cameras.py --vid_name $VID_NAME --DO_PROJECTION_TEST --postfix nV1_noPho_noMICA_uv2000.0_n1000.0
 ````
+> Note: Depending on the chosen parameters the `postfix` might change. You can check the postfix in the result folder in `TRACKING_OUTPUT`, it should be named `{VID_NAME}_{postfix}`.
 
 ### 2.6 Example Inference
 You can run our tracker on example videos, by following the steps described in [2. Face Tracking](#2-face-tracking), and setting `PATH_TO_VIDEO="/path/to/this/repo/example_videos/ex1.mp4`.
