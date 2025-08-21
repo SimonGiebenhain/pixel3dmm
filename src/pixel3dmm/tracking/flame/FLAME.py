@@ -66,9 +66,16 @@ class FLAME(nn.Module):
 
     def __init__(self, config):
         super(FLAME, self).__init__()
-        with open(f'{env_paths.FLAME_ASSETS}/FLAME2020/generic_model.pkl', 'rb') as f:
-            ss = pickle.load(f, encoding='latin1')
-            flame_model = Struct(**ss)
+        if config.use_flame2023:
+            with open(f'{env_paths.FLAME_ASSETS}/FLAME2023/flame2023_no_jaw.pkl', 'rb') as f:
+                ss = pickle.load(f, encoding='latin1')
+                flame_model = Struct(**ss)
+            self.use_flame2023 = True
+        else:
+            with open(f'{env_paths.FLAME_ASSETS}/FLAME2020/generic_model.pkl', 'rb') as f:
+                ss = pickle.load(f, encoding='latin1')
+                flame_model = Struct(**ss)
+            self.use_flame2023 = False
 
         self.dtype = torch.float32
         self.register_buffer('faces', to_tensor(to_np(flame_model.f, dtype=np.int64), dtype=torch.long))
@@ -214,6 +221,9 @@ class FLAME(nn.Module):
                 vertices: N X V X 3
                 landmarks: N X number of landmarks X 3
         """
+        if self.use_flame2023:
+            jaw_pose_params = None
+
         batch_size = shape_params.shape[0]
 
         I = matrix_to_rotation_6d(torch.cat([torch.eye(3)[None]] * batch_size, dim=0).cuda())

@@ -59,13 +59,13 @@ lr_f : 0.1 #0.05 #0.01 #0.001
 lr_pp : 0.00005
 
 # some loss weights
-w_pho : 150 # unused
-w_lmks : 3000 # weight for eye landmarks
-w_lmks_mouth : 1000 # weight for mouth landmarks
-w_lmks_68 : 1000 # unused
-w_lmks_lid : 1000 # weightr for eye closure loss
+w_pho : 0 #150 # unused
+w_lmks : 1000 # 3000weight for eye landmarks
+w_lmks_mouth : 0 #1000 # weight for mouth landmarks
+w_lmks_68 : 0 #1000 # unused
+w_lmks_lid :  1000 # weightr for eye closure loss
 w_lmks_iris : 1000 # weight for iris/pupil loss, responsible for viewing direction
-w_lmks_oval : 2000 # unused
+w_lmks_oval : 0 #2000 # unused
 w_lmks_star : 0 # unused
 
 include_neck : True # whether to optimize for neck or not
@@ -112,3 +112,7 @@ save_landmarks : False
 
 save_meshes : True
 delete_preprocessing : False
+
+is_discontinuous : False
+
+use_flame2023: False # use flame_2023 version WITHOUT explicit jaw rotation

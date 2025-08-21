@@ -13,6 +13,7 @@ cd ..
 # MICA
 git clone git@github.com:Zielon/MICA.git
 cd MICA
+cp ../replacement_code/install_mica_download_flame.sh install.sh
 cp ../replacement_code/mica_demo.py demo.py
 cp ../replacement_code/mica.py micalib/models/mica.py
 ./install.sh

@@ -15,10 +15,11 @@ from pixel3dmm.env_paths import PREPROCESSED_DATA, TRACKING_OUTPUT
 
 
 def main(vid_name : str,
+         postfix : str = 'nV1_noPho_uv2000.0_n1000.0',
          HEAD_CENTRIC : bool = True,
          DO_PROJECTION_TEST : bool = False,
          ):
-    tracking_dir = f'{TRACKING_OUTPUT}/{vid_name}_nV1_noPho_uv2000.0_n1000.0'
+    tracking_dir = f'{TRACKING_OUTPUT}/{vid_name}_{postfix}'
 
     meshes = [f for f in os.listdir(f'{tracking_dir}/mesh/') if f.endswith('.ply') and not 'canonical' in f]
     meshes.sort()
@@ -55,7 +56,6 @@ def main(vid_name : str,
             flame2world = np.eye(4)
             flame2world[:3, :3] = head_rot
             flame2world[:3, 3] = np.squeeze(ckpt['flame']['t'])
-            #TODO include neck transform as well
             extr_open_gl_world_to_cam = extr_open_gl_world_to_cam @ flame2world @ ckpt['joint_transforms'][0, 1, :, :]
 
 

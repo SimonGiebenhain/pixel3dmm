@@ -13,7 +13,7 @@ def main(video_or_images_path : str):
 
     os.system(f'cd {env_paths.CODE_BASE}/scripts/ ; python run_cropping.py --video_or_images_path {video_or_images_path}')
 
-    os.system(f'cd {env_paths.CODE_BASE}/src/pixel3dmm/preprocessing/MICA ; python demo.py -video_name {vid_name}')
+    os.system(f'cd {env_paths.CODE_BASE}/src/pixel3dmm/preprocessing/MICA ; python demo.py -video_name {vid_name} -a {env_paths.PREPROCESSED_DATA}/{vid_name}/arcface/')
 
     os.system(f'cd {env_paths.CODE_BASE}/scripts/ ; python run_facer_segmentation.py --video_name {vid_name}')
 

@@ -137,7 +137,7 @@ class Tracker(object):
         DATA_FOLDER = f'{env_paths.PREPROCESSED_DATA}/{self.actor_name}'
         self.MAX_STEPS = min(len([f for f in os.listdir(f'{DATA_FOLDER}/cropped/') if f.endswith('.jpg') or f.endswith('.png')]) - self.config.start_frame, 1000)
         self.FRAME_SKIP = 1
-        self.BATCH_SIZE = self.config.batch_size
+        self.BATCH_SIZE = min(self.config.batch_size, self.MAX_STEPS)
 
         print(f'''
                 <<<<<<<< INITIALIZING TRACKER INSTANCE FOR {self.actor_name} >>>>>>>>
@@ -323,7 +323,7 @@ class Tracker(object):
             }
         )
         bs = exp.shape[0]
-        vertices, lmks, joint_transforms, vertices_can, vertices_noneck = self.flame(cameras=torch.inverse(self.R_base[0])[:1, ...].repeat(bs, 1, 1),
+        vertices, lmks_posed, joint_transforms, vertices_can_wexpr, vertices_noneck = self.flame(cameras=torch.inverse(self.R_base[0])[:1, ...].repeat(bs, 1, 1),
                    shape_params=self.shape[:1, ...].repeat(bs, 1),
                    expression_params=exp,
                    eye_pose_params=eyes,
@@ -332,6 +332,9 @@ class Tracker(object):
                    rot_params_lmk_shift=R,
                    eyelid_params=eyelids,
         )
+        _, lmks, _, vertices_can_can, _ = self.flame(cameras=torch.inverse(self.R_base[0])[:1, ...].repeat(bs, 1, 1),
+            shape_params=self.shape[:1, ...].repeat(bs, 1),
+            )
         frame.update(
             {
                 f'joint_transforms': joint_transforms.detach().cpu().numpy(),
@@ -357,7 +360,8 @@ class Tracker(object):
 
         if frame_id == self.config.start_frame and self.config.save_meshes:
             faces = self.diff_renderer.faces[0].cpu().numpy()
-            trimesh.Trimesh(faces=faces, vertices=vertices_can[0].detach().cpu().numpy(), process=False).export(f'{self.mesh_folder}/canonical.ply')
+            #trimesh.Trimesh(faces=faces, vertices=vertices_can[0].detach().cpu().numpy(), process=False).export(f'{self.mesh_folder}/canonical.ply')
+            trimesh.Trimesh(faces=faces, vertices=vertices_can_can[0].detach().cpu().numpy(), process=False).export(f'{self.mesh_folder}/canonical.ply')
         if self.config.save_landmarks:
             lmks = lmks.detach().squeeze().cpu().numpy()
             np.save(f'{self.mesh_folder}/ibug68_{frame_id}.ply', lmks)
@@ -717,7 +721,7 @@ class Tracker(object):
     def data_stuff(self, is_joint, iters, p, image_lmks68, lmk_mask, normal_map, normal_mask, uv_map, uv_mask, left_iris, right_iris, mask_left_iris, mask_right_iris):
         if is_joint:
             with torch.no_grad():
-                if (p < int(iters * 0.15) and (p % 2 == 0)) or not self.config.smooth:
+                if ((p < int(iters * 0.15) and (p % 2 == 0)) or not self.config.smooth) or self.config.is_discontinuous:
                     all_frames = np.array(
                         range(self.config.start_frame, self.MAX_STEPS + self.config.start_frame, self.FRAME_SKIP))
                     selected_frames = np.sort(np.random.choice(np.arange(len(all_frames)), size=self.BATCH_SIZE,
@@ -728,7 +732,7 @@ class Tracker(object):
                     start = np.min(all_frames)
                     end = np.max(all_frames)
                     rnd_start = np.random.randint(start, end)
-                    assert (end - start) >= self.BATCH_SIZE + 1
+                    assert (end - start + 1 )>= self.BATCH_SIZE
                     assert self.BATCH_SIZE % 2 == 0
                     if rnd_start - self.BATCH_SIZE // 2 < 0:
                         rnd_start = self.BATCH_SIZE // 2
@@ -993,8 +997,9 @@ class Tracker(object):
                 losses['loss/normal'] = 0.0
 
 
-        # smoothness loss
-        losses = self.add_smooth_loss(losses, is_joint, p, iters, variables)
+        if not self.config.is_discontinuous:
+            # smoothness loss
+            losses = self.add_smooth_loss(losses, is_joint, p, iters, variables)
 
         all_loss = self.reduce_loss(losses)
 
@@ -1633,7 +1638,8 @@ class Tracker(object):
                     self.cached_data[k].append(batch[k])
             if timestep == self.config.start_frame:
                 self.optimize_camera(batch, steps=500, is_first_frame=True)
-                params = lambda: self.clone_params_keyframes_all(freeze_id=False, freeze_cam=self.config.global_camera, include_neck=self.config.include_neck)
+                #params = lambda: self.clone_params_keyframes_all(freeze_id=self.config.is_discontinuous, freeze_cam=self.config.global_camera, include_neck=self.config.include_neck)
+                params = lambda: self.clone_params_keyframes_all(freeze_id=not (self.MAX_STEPS==1), freeze_cam=self.config.global_camera, include_neck=self.config.include_neck)
                 is_first_step = True
             else:
                 if self.config.extra_cam_steps:
@@ -1663,6 +1669,35 @@ class Tracker(object):
             if not self.config.global_camera:
                 self.intermediate_fls.append(self.focal_length.detach().clone())
                 self.intermediate_pps.append(self.principal_point.detach().clone())
+
+            # for temporally discontinuous inputs, donÄt carry over state of the head (except for shape aprameters)
+            if self.config.is_discontinuous:
+                n_timesteps = 1
+                expression_params = np.zeros([n_timesteps, 100])
+                jaw_params = np.zeros([n_timesteps, 3])
+                neck_params = np.zeros([n_timesteps, 3])
+                flame_R = torch.from_numpy(np.stack([np.eye(3) for _ in range(n_timesteps)], axis=0))
+                flame_t = torch.from_numpy(np.stack([np.zeros([3]) for _ in range(n_timesteps)], axis=0))
+                self.R = nn.Parameter(matrix_to_rotation_6d(flame_R.float().to(self.device)))
+                self.t = nn.Parameter(flame_t.float().to(self.device))
+
+                self.expression_params = expression_params
+                self.jaw_params = jaw_params.astype(np.float32)
+                self.neck_params = neck_params.astype(np.float32)
+
+                self.exp = nn.Parameter(
+                    torch.from_numpy(self.expression_params[[0] + self.config.keyframes, ..., :]).float().to(
+                        self.device))
+                self.jaw = nn.Parameter(matrix_to_rotation_6d(euler_angles_to_matrix(
+                    torch.from_numpy(self.jaw_params[[0] + self.config.keyframes, ..., :]).cuda(), 'XYZ')))
+                self.neck = nn.Parameter(matrix_to_rotation_6d(euler_angles_to_matrix(
+                    torch.from_numpy(self.neck_params[[0] + self.config.keyframes, ..., :]).cuda(), 'XYZ')))
+
+                self.eyes = nn.Parameter(torch.cat([matrix_to_rotation_6d(I), matrix_to_rotation_6d(I)], dim=1).repeat(
+                    1 + len(self.config.keyframes), 1))
+                self.eyelids = nn.Parameter(torch.zeros(1 + len(self.config.keyframes), 2).float().to(self.device))
+
+
 
             if self.config.early_exit:
                 exit()
