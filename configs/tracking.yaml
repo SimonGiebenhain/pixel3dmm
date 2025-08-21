@@ -29,8 +29,7 @@ disable_edge : False # unused
 
 keyframes : [] # unused
 
-ignore_mica : False # unused
-flame2023 : False # unused
+ignore_mica : False
 
 uv_map_super : 2000.0 #500.0 #100 #2001.0 #5000.0 #2000.0 # weight for UV-loss
 normal_super : 1000.0 #202.0 # weight for normal loss
