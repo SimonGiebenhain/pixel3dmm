@@ -120,6 +120,7 @@ WFLW_2_iBUG68 = np.array(
 
 WFLW_2_iBUG68 = torch.from_numpy(WFLW_2_iBUG68).cuda()
 
+# for debugging might to be set to False
 COMPILE = True
 
 
@@ -168,8 +169,6 @@ class Tracker(object):
         if self.config.ignore_mica:
             self.actor_name = self.actor_name + '_noMICA'
 
-        if self.config.flame2023:
-            self.actor_name = self.actor_name + '_FLAME23'
 
 
 
